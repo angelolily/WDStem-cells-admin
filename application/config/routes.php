@@ -87,6 +87,8 @@ $route['rl/new'] = 'RoleControl/newRow';//新增角色
 $route['rl/get'] = 'RoleControl/getRow';//获取或刷新角色
 $route['rl/del'] = 'RoleControl/delRow';//删除角色
 $route['rl/dis'] = 'RoleControl/distriRow';//设置角色数据权限
+$route['wlr/wl'] = 'CustomeInterface/wechat_login';//小程序登陆
+$route['wps/hps'] = 'ProductStoreInterface/ControlHomeProductList';//首页商品列表获取
 
 
 
