@@ -90,20 +90,20 @@ class wProductStore extends HTY_service
                 $oid=['order_autoid <='=>$info['order_autoid']];
             }
 
-            if($info['order_cutstome']=="")
+            if($info['order_customer_name']=="")
             {
                 //查询该代理商下的所有客户
-                $ag_custome=$this->Custome_Model->table_seleRow('custome_id',"cell_customer",['custome_agent'=>$info['custome_agent']]);
+                $ag_custome=$this->Custome_Model->table_seleRow('custome_id',"cell_customer",['custome_agent'=>$info['customer_agent']]);
                 if(count($ag_custome)>0)
                 {
 
-
-                    $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_customer",
-                                    $oid,[],10,0,"order_datetime","DESC",$ag_custome,"order_cutstome");
+                    $ag_custome = array_column($ag_custome, 'custome_id');
+                    $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
+                                    $oid,[],10,0,"order_datetime","DESC",$ag_custome,"order_customer");
 
                     if(count($order_list)>0)
                     {
-                        $appdata['Data']=$order_list[0];
+                        $appdata['Data']=$order_list;
                         $appdata["ErrorCode"]="";
                         $appdata["ErrorMessage"]="订单获取成功";
                         $appdata["Success"]=true;
@@ -134,25 +134,57 @@ class wProductStore extends HTY_service
             }
             else
             {
-                $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_customer",['order_cutstome'=>$info['order_cutstome']],
-                    $oid,[],10,0,"order_datetime","DESC");
 
-                if(count($order_list)>0)
+
+
+                //查询该客户是否是服务商客户
+                $ag_custome=$this->Custome_Model->table_seleRow('custome_id',"cell_customer",['custome_agent'=>$info['customer_agent'],'custome_name'=>$info['order_customer_name']]);
+                if(count($ag_custome)>0)
                 {
-                    $appdata['Data']=$order_list[0];
-                    $appdata["ErrorCode"]="";
-                    $appdata["ErrorMessage"]="订单获取成功";
-                    $appdata["Success"]=true;
-                    $appdata["Status_Code"]="AOS200";
+
+                    if($info['order_autoid']==0)
+                    {
+                        $oid=[];
+                    }
+                    else
+                    {
+                        $oid=['order_autoid <='=>$info['order_autoid'],'custome_id'=>$ag_custome[0]['custome_id']];
+                    }
+
+
+
+                    $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
+                        $oid,[],10,0,"order_datetime","DESC");
+
+                    if(count($order_list)>0)
+                    {
+                        $appdata['Data']=$order_list;
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="订单获取成功";
+                        $appdata["Success"]=true;
+                        $appdata["Status_Code"]="AOS200";
+                    }
+                    else
+                    {
+                        $appdata['Data']=[];
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="无订单数据";
+                        $appdata["Success"]=true;
+                        $appdata["Status_Code"]="AOS201";
+                    }
+
+
                 }
                 else
                 {
                     $appdata['Data']=[];
                     $appdata["ErrorCode"]="";
-                    $appdata["ErrorMessage"]="无订单数据";
+                    $appdata["ErrorMessage"]="该客户的服务商不是您";
                     $appdata["Success"]=true;
-                    $appdata["Status_Code"]="AOS201";
+                    $appdata["Status_Code"]="AOS204";
                 }
+
+
             }
 
 
@@ -176,20 +208,20 @@ class wProductStore extends HTY_service
         {
             if($info['order_autoid']==0)
             {
-                $oid=[];
+                $oid=['order_customer'=>$info['order_customer']];
             }
             else
             {
-                $oid=['order_autoid <='=>$info['order_autoid']];
+                $oid=['order_autoid <='=>$info['order_autoid'],'order_customer'=>$info['order_customer']];
             }
 
 
-            $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",['order_cutstome'=>$info['order_cutstome']],
+            $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
                 $oid,[],10,0,"order_datetime","DESC");
 
             if(count($order_list)>0)
             {
-                $appdata['Data']=$order_list[0];
+                $appdata['Data']=$order_list;
                 $appdata["ErrorCode"]="";
                 $appdata["ErrorMessage"]="订单获取成功";
                 $appdata["Success"]=true;
@@ -210,6 +242,40 @@ class wProductStore extends HTY_service
 
         return $appdata;
         
+    }
+
+
+    public function OneAddOrder($info=[])
+    {
+        $appdata=[];
+        if(count($info)>0)
+        {
+            $info['order_datetime']=date('Y-m-d H:i:s');
+            $info['order_id']=time().rand(1111,9999);
+            $isAddtrue=$this->Custome_Model->table_addRow("cell_order",$info);
+            if($isAddtrue>0)
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="订单添加成功";
+                $appdata["Success"]=true;
+                $appdata["Status_Code"]="ODA200";
+            }
+            else
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="订单添加失败";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="ODA201";
+
+            }
+
+        }
+
+
+        return $appdata;
+
     }
 
     

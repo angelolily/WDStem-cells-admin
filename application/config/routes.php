@@ -90,6 +90,8 @@ $route['rl/dis'] = 'RoleControl/distriRow';//设置角色数据权限
 $route['wlr/wl'] = 'CustomeInterface/wechat_login';//小程序登陆
 $route['wps/hps'] = 'ProductStoreInterface/ControlHomeProductList';//首页商品列表获取
 $route['wps/hps'] = 'ProductStoreInterface/ControlHomeProductList';//首页商品列表获取
+$route['wps/odadd'] = 'ProductStoreInterface/ControlOrderOneAdd';// 首次添加订单
+$route['wps/odlst'] = 'ProductStoreInterface/ControlProductList';// 获取订单列表，代理商与客户
 
 
 
