@@ -14,7 +14,7 @@ class LoginControl extends CI_Controller
 	/**
 	 * Notes:用户登录
 	 * User: ljx
-	 * DateTime: 2021/1/22 14:41
+	 * DateTime: 2021/1/22 14:41A
 	 */
 	public function loginRow()
 	{

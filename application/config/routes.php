@@ -87,6 +87,9 @@ $route['rl/new'] = 'RoleControl/newRow';//新增角色
 $route['rl/get'] = 'RoleControl/getRow';//获取或刷新角色
 $route['rl/del'] = 'RoleControl/delRow';//删除角色
 $route['rl/dis'] = 'RoleControl/distriRow';//设置角色数据权限
+$route['ag/getCustomer'] = 'AgentControl/getCustomer';//获取代理商客户
+$route['ag/newCustomer'] = 'AgentControl/newCustomer';//代理商新增客户
+$route['ag/updateCustomer'] = 'AgentControl/updateCustomer';//代理商编辑客户
 
 
 
