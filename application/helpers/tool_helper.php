@@ -68,7 +68,17 @@ function existsArrayKey($keys,$arr=[])
 	return $errorKeys;
 
 }
+function build_resultArr($code,$success,$status_code,$msg=null,$data=[])
+{
+    $resultArr['ErrorCode']=$code;
+    $resultArr['Success'] = $success;
+    $resultArr['Status_Code'] = $status_code;
+    $resultArr['ErrorMessage'] = $msg;
+    $resultArr['Data'] =$data;
 
+    return $resultArr;
+
+}
 
 //function Data_rights($keys)//所有搜索接口的数据权限限制,返回值是用户的数据搜索限制
 //{
