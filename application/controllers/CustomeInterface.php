@@ -12,7 +12,7 @@ class CustomeInterface extends CI_Controller
     {
         parent::__construct();
         $this->load->service('WechatLoginRegister');
-
+        $this->load->helper('tool');
     }
 
 
@@ -50,6 +50,99 @@ class CustomeInterface extends CI_Controller
 
 
     }
+
+
+    /**
+     *   微信客服注册
+     */
+    public function wechat_custome_regist()
+    {
+
+        $agentinfo = file_get_contents('php://input');
+
+        if($agentinfo!=""){
+            $info = json_decode($agentinfo, true);
+            $requestData=array();
+            $keys="custome_name,custome_sex,custome_birthday,custome_phone,custome_agent";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wechatloginregister->wechatCustomerRegist($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="OAD203";
+
+            }
+
+
+
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="OAD203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+
+    /**
+     *  微信代理商注册
+     */
+    public function wechat_agent_regist()
+    {
+
+        $agentinfo = file_get_contents('php://input');
+
+        if($agentinfo!="") {
+            $info = json_decode($agentinfo, true);
+            $requestData = array();
+            $keys = "custome_name,custome_sex,custome_birthday,custome_phone,custome_agent";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
+
+            }
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="OAD203";
+
+        }
+
+        
+    }
+
+
+
+
+
+
+
 
 
 

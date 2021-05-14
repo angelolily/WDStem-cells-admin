@@ -136,12 +136,66 @@ class WechatLoginRegister extends HTY_service
             $assdata['Data']=$info;
             $assdata["ErrorCode"]="";
             $assdata["ErrorMessage"]="登陆失败，请注册";
-            $assdata["Success"]=true;
+            $assdata["Success"]=false;
             $assdata["Status_Code"]="WL205";
 
         }
 
         return $assdata;
+
+
+    }
+
+    //微信客户注册
+    public function wechatCustomerRegist($info)
+    {
+
+        $assdata=[];
+
+        if(count($info)>0){
+
+            if($info['custome_agent']=="")
+            {
+                $info['custome_agent']="1";//没有服务商绑定的，默认1号公司服务商
+            }
+
+
+            $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
+
+
+            if($isok>=0){
+                $assdata['Data']=[];
+                $assdata["ErrorCode"]="";
+                $assdata["ErrorMessage"]="插入成功";
+                $assdata["Success"]=true;
+                $assdata["Status_Code"]="WR200";
+
+            }
+            else
+            {
+                $assdata['Data']=[];
+                $assdata["ErrorCode"]="";
+                $assdata["ErrorMessage"]="插入失败";
+                $assdata["Success"]=false;
+                $assdata["Status_Code"]="WR202";
+
+            }
+
+
+
+        }
+        else
+        {
+            $assdata['Data']=[];
+            $assdata["ErrorCode"]="";
+            $assdata["ErrorMessage"]="无接收数据";
+            $assdata["Success"]=false;
+            $assdata["Status_Code"]="WR202";
+        }
+
+
+        return $assdata;
+
 
 
     }

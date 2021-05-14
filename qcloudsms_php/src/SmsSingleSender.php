@@ -80,7 +80,7 @@ class SmsSingleSender
      * @return string 应答json字符串，详细内容参见腾讯云协议文档
      */
     public function sendWithParam($nationCode, $phoneNumber, $templId = 0, $params,
-                                  $sign = "", $extend = "", $ext = "")
+        $sign = "", $extend = "", $ext = "")
     {
         $random = $this->util->getRandom();
         $curTime = time();
