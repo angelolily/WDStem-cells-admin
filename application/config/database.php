@@ -75,9 +75,9 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => 'root',
+	'hostname' => '124.70.77.122',
+	'username' => 'htysg',
+	'password' => 'htysgabc',
 	'database' => 'WDStem-cells-db',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

@@ -197,6 +197,355 @@ class ProductStoreInterface extends CI_Controller
     }
 
 
+    /**
+     * 获取当前登陆客户的所有预约记录
+     */
+    public function getSubscribe()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="subscribe_created_by,subscribe_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->getSubscribe($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="SUB203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="SUB203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+
+    /**
+     * 获取当前登陆客户的所有投诉建议记录
+     */
+    public function getAdvice()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="advice_custome,advice_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->getAdvice($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ADV203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+
+    /**
+     *   新增投诉建议
+     */
+    public function addAdvice()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="advice_type,advice_custome,advice_center,advice_phone,custome_deptid";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->AddAdvice($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ADV203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
+
+    /**
+     *  获取我的账户余额
+     */
+    public function getMyAccount()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="custome_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->getAccount($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ACNT203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ACNT203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
+    /**
+     *  获取充值记录
+     */
+    public function getRachargeList()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="recharge_custome,recharge_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->getRechargeList($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ACNT203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ACNT203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
+    /**
+     *  添加充值记录
+     */
+    public function addRecharge()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="recharge_money,recharge_custome,recharge_rate";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->addRecharge($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ADV203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+    }
+
+    /**
+     *  修改充值记录状态
+     */
+    public function modifyRechargeState()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="recharge_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->modifyRecharge($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ADV203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+    }
+    
+    
+    
+
+
+
+
+
+
+
+
 
 
 

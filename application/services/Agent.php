@@ -16,6 +16,7 @@ class Agent extends HTY_service
         $this->load->helper('tool');
     }
 
+
     public function getCustomer($val)
     {
         $field="custome_id,custome_created_time,custome_name,custome_phone,custome_sex,custome_agent_rate";

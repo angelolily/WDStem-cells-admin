@@ -57,7 +57,6 @@ class Author
 
 	public static function verifica()
 	{
-<<<<<<< .mine
 		$ss = $_SERVER['REQUEST_METHOD'];
 		if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 			http_data(200, [], self::$CI);
@@ -137,7 +136,6 @@ class Author
 //				http_data($statue, $resulInfo, self::$CI);
 //			}
 //		}
-=======
 //		$ss = $_SERVER['REQUEST_METHOD'];
 //		if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 //			http_data(200, [], self::$CI);
@@ -217,7 +215,6 @@ class Author
 //				http_data($statue, $resulInfo, self::$CI);
 //			}
 //		}
->>>>>>> .theirs
 	}
 }
 

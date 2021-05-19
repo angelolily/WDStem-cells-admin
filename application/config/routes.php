@@ -93,9 +93,18 @@ $route['wps/odadd'] = 'ProductStoreInterface/ControlOrderOneAdd';// 首次添加
 $route['wps/odlst'] = 'ProductStoreInterface/ControlProductList';// 获取订单列表，代理商与客户
 $route['wps/sms'] = 'ProductStoreInterface/ControlSendSMS';// 获取订单列表，代理商与客户
 $route['wps/reg'] = 'CustomeInterface/wechat_custome_regist';// 微信客户注册
+$route['wps/agreg'] = 'CustomeInterface/wechat_agent_regist';// 代理商微信端注册
+$route['wps/sbuget'] = 'ProductStoreInterface/getSubscribe';// 获取预定信息
+$route['wps/advget'] = 'ProductStoreInterface/getAdvice';// 获取投诉信息
+$route['wps/advadd'] = 'ProductStoreInterface/addAdvice';// 新增投诉信息
+$route['wps/accget'] = 'ProductStoreInterface/getMyAccount';// 获取客户账户额度
+$route['wps/rechadd'] = 'ProductStoreInterface/addRecharge';// 添加充值记录
+$route['wps/rechget'] = 'ProductStoreInterface/getRachargeList';// 获取充值记录历史
+$route['wps/rechmod'] = 'ProductStoreInterface/modifyRechargeState';// 修改充值记录状态
 $route['ag/getCustomer'] = 'AgentControl/getCustomer';//获取代理商客户
 $route['ag/newCustomer'] = 'AgentControl/newCustomer';//代理商新增客户
 $route['ag/updateCustomer'] = 'AgentControl/updateCustomer'; //代理商编辑客户
+
 
 
 

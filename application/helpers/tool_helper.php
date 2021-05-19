@@ -15,6 +15,18 @@ function bykey_reitem($arr, $key){
 
 }
 
+//单独文件类型，保存base64文件
+function base64_file_content_type($base64_image_content,$path,$name,$type="jpg"){
+    $new_file = $path;
+    $new_file = $new_file.'/'.$name.".{$type}";
+    if (file_put_contents($new_file, base64_decode($base64_image_content))){
+        return  $new_file;
+    }else{
+        return "";
+    }
+}
+
+
 function build_resulArr($code,$success,$msg,$data)
 {
 	$resulArr['code']=$code;
@@ -80,26 +92,5 @@ function build_resultArr($code,$success,$status_code,$msg=null,$data=[])
 
 }
 
-//function Data_rights($keys)//所有搜索接口的数据权限限制,返回值是用户的数据搜索限制
-//{
-//	if($keys['DataScope']=="1"){
-//		$item['phone']=$keys['Mobile'];
-//		return $item;
-//	}
-//	if($keys['DataScope']=="2"){
-//
-//	}
-//	if($keys['DataScope']=="3"){
-//
-//	}
-//	if($keys['DataScope']=="4"){
-//
-//	}
-//	if($keys['DataScope']=="5"){
-//
-//	}
-//
-//
-//
-//}
+
 

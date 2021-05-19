@@ -107,6 +107,11 @@ class CustomeInterface extends CI_Controller
     }
 
 
+
+
+
+
+
     /**
      *  微信代理商注册
      */
@@ -118,9 +123,11 @@ class CustomeInterface extends CI_Controller
         if($agentinfo!="") {
             $info = json_decode($agentinfo, true);
             $requestData = array();
-            $keys = "custome_name,custome_sex,custome_birthday,custome_phone,custome_agent";
+            $keys = "UserName,Mobile,Birthday,UserEmail,Sex,Avatar,openid,UserBank,UserBankNum";
             $errorKey = existsArrayKey($keys, $info);
             if ($errorKey == "") {
+
+                $requestData=$this->wechatloginregister->wechatAgentRegist($info);
 
             }
         }
@@ -133,6 +140,10 @@ class CustomeInterface extends CI_Controller
             $requestData["Status_Code"]="OAD203";
 
         }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
 
         
     }

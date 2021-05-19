@@ -14,7 +14,7 @@ class WechatLoginRegister extends HTY_service
 	{
 		parent::__construct();
 		$this->load->model('Custome_Model');
-
+        $this->load->helper('tool');
 	}
 
     public function wechatLogin($info)
@@ -156,11 +156,21 @@ class WechatLoginRegister extends HTY_service
 
             if($info['custome_agent']=="")
             {
-                $info['custome_agent']="1";//没有服务商绑定的，默认1号公司服务商
+                $info['custome_agent']="HTY5fe5995f6e7dd7.56485291";//没有服务商绑定的，默认1号公司服务商
             }
 
+            //查询代理商部门id
+            $dept=$this->Custome_Model->table_seleRow('UserDept',"base_user",['Userid'=>$info['custome_agent']]);
 
-            $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
+            if(count($dept)>0)
+            {
+                $info['custome_deptid']=$dept[0]['UserDept'];
+                $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
+            }
+            else{
+                $isok=-1;
+            }
+
 
 
             if($isok>=0){
@@ -199,6 +209,85 @@ class WechatLoginRegister extends HTY_service
 
 
     }
+
+    //微信代理商注册
+    public function wechatAgentRegist($info){
+
+        $assdata=[];
+
+	    if(count($info)>0)
+        {
+
+            $savePath="./public/agentAvatar";
+            //以代理商手机号作为头像保存文件名
+            $filename=$info['Mobile'];
+            $isSave=base64_file_content_type($info['Avatar'],$savePath,$filename);
+            if($isSave!="")
+            {
+                //图片保存成功
+                $info['Avatar']="https://wdstem-cells-admin/public/agentAvatar/".$filename.".jpg";
+                $info['UserStatus']=1;
+                $info['Userid']=uniqid("HTY", 4);
+
+                $isok=$this->Custome_Model->table_addRow('base_user',$info);
+
+
+                if($isok>=0){
+                    $assdata['Data']=[];
+                    $assdata["ErrorCode"]="";
+                    $assdata["ErrorMessage"]="插入成功";
+                    $assdata["Success"]=true;
+                    $assdata["Status_Code"]="WAR200";
+
+                }
+                else
+                {
+                    $assdata['Data']=[];
+                    $assdata["ErrorCode"]="";
+                    $assdata["ErrorMessage"]="插入失败";
+                    $assdata["Success"]=false;
+                    $assdata["Status_Code"]="WAR202";
+
+                }
+
+
+            }
+            else
+            {
+                $assdata['Data']=[];
+                $assdata["ErrorCode"]="";
+                $assdata["ErrorMessage"]="图片保存失败";
+                $assdata["Success"]=false;
+                $assdata["Status_Code"]="WAR203";
+
+            }
+
+
+
+
+
+        }
+        else
+        {
+            $assdata['Data']=[];
+            $assdata["ErrorCode"]="";
+            $assdata["ErrorMessage"]="无接收数据";
+            $assdata["Success"]=false;
+            $assdata["Status_Code"]="WR202";
+        }
+
+
+
+
+
+
+        return $assdata;
+
+
+    }
+
+
+
 
 
 
