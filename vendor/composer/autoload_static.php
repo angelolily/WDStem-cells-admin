@@ -45,6 +45,7 @@ class ComposerStaticInita628e0bf1c10128da9b9b70855c3af3a
         array (
             'Psr\\Http\\Message\\' => 17,
             'Prophecy\\' => 9,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'G' => 
         array (
@@ -109,6 +110,10 @@ class ComposerStaticInita628e0bf1c10128da9b9b70855c3af3a
         'Prophecy\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

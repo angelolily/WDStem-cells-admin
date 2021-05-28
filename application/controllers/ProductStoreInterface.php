@@ -15,6 +15,8 @@ class ProductStoreInterface extends CI_Controller
     {
         parent::__construct();
         $this->load->service('wProductStore');
+        $this->load->service('CheckIdCardInformation');
+        $this->load->service('Express');
         $this->load->helper('tool');
     }
 
@@ -157,7 +159,8 @@ class ProductStoreInterface extends CI_Controller
                 $requestSMS= $ssender->sendWithParam("86",$info['sendPhone'],"952423",$sendinfo,"沃顿健康管理");
                 $rsp = json_decode($requestSMS, true);
                 if ($rsp["result"] === 0) {
-                    $requestData['Data']=$sendinfo[1];
+                    $sendinfo[0]=$info['sendPhone'];
+                    $requestData['Data']=$sendinfo;
                     $requestData["ErrorCode"]="";
                     $requestData["ErrorMessage"]="";
                     $requestData["Success"]=true;
@@ -535,6 +538,397 @@ class ProductStoreInterface extends CI_Controller
         header("Content-type: application/json");
         echo json_encode($requestData);
     }
+
+    /**
+     *  上传身份证照片进行验证
+     */
+    public function isCardTrue()
+    {
+        $files=$_FILES;
+        $resulArr=[];
+        $saveFileName="";
+        $ordernum=$this->input->post('order_id');//订单id
+        $applyname=$this->input->post('applyname');//验证姓名
+        $custome_ide=$this->input->post('custome_id');//判断是否要同步更新客户表
+
+        $requestData=array();
+        if(count($files)>0)
+        {
+            $dirpath="./public/idCard/".$ordernum;
+            //判断目录是否存在，如果不存在就新建
+            if(is_dir($dirpath) or mkdir($dirpath))
+            {
+
+            }
+
+
+            $file_tmp = $files['cardfile']['tmp_name'];
+            $savePath=$dirpath."/".$files['cardfile']['name'];
+            $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
+
+            if($move_result)
+            {
+                //识别身份证
+                $requestData=$this->checkidcardinformation->isIdCard($savePath,$applyname,$ordernum,$custome_ide);
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="CCA205";
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+
+    /**
+     *  上传身份证背面照片
+     */
+    public function saveCardBack()
+    {
+        $files=$_FILES;
+        $resulArr=[];
+        $saveFileName="";
+        $ordernum=$this->input->post('order_id');//订单id
+
+        $requestData=array();
+        if(count($files)>0)
+        {
+            $dirpath="./public/idCard/".$ordernum;
+            //判断目录是否存在，如果不存在就新建
+            if(is_dir($dirpath) or mkdir($dirpath))
+            {
+
+
+            }
+
+
+            $file_tmp = $files['cardfileback']['tmp_name'];
+            $savePath=$dirpath."/".$files['cardfileback']['name'];
+            $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
+
+            if($move_result)
+            {
+
+                //修改身份证照片
+                $requestData=$this->checkidcardinformation->updateBackup($ordernum,$savePath);
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="CCA205";
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+
+    /**
+     *  上传身份证照片进行验证
+     */
+    public function isFaceTrue()
+    {
+        $files=$_FILES;
+        $resulArr=[];
+        $saveFileName="";
+        $ordernum=$this->input->post('order_id');//订单id
+        $applyname=$this->input->post('name');//验证姓名
+        $acard=$this->input->post('card');//验证身份证号码
+        $custome_id=$this->input->post('custome_id');//判断是否要同步更新客户表
+
+        $requestData=array();
+        if(count($files)>0)
+        {
+            $dirpath="./public/idCard/".$ordernum;
+            //判断目录是否存在，如果不存在就新建
+            if(is_dir($dirpath) or mkdir($dirpath))
+            {
+
+            }
+
+            //默认上传识别第一张图片
+            $file_tmp = $files['face']['tmp_name'];
+            $savePath=$dirpath."/".$files['face']['name'];
+            $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
+
+            if($move_result)
+            {
+
+
+                $requestData=$this->checkidcardinformation->isFacetrue($savePath,$applyname,$acard,$custome_id,$ordernum);
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="CCA205";
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+
+    }
+
+    /**
+     * 获取物流信息
+     */
+    public function getExpress()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="order_logistics";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->express->getExpressinfo($info['order_logistics']);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="ACNT203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ACNT203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
+    /**
+     * 上传体检报告
+     */
+    public function uploadfileMedical()
+    {
+        $files=$_FILES;
+        $i=0;
+        $ordernum=$this->input->post('order_id');//订单id
+
+        if(count($files)>0) {
+            $dirpath = "./public/medical/" . $ordernum;
+            //判断目录是否存在，如果不存在就新建
+            if (is_dir($dirpath) or mkdir($dirpath)) {
+
+            }
+            //默认上传识别第一张图片
+
+
+            foreach ($files as $file)
+            {
+                //图片按顺序保存
+
+                $file_tmp = $file['tmp_name'];
+                $savePath=$dirpath."/".rand(111,222).".jpg";
+                $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
+
+            }
+
+
+            if($i==count($files))
+            {
+
+
+                $requestData=$this->wproductstore->modifyHealth($ordernum);
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="CCA205";
+            }
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="ADV203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+        
+    }
+
+    /**
+     * 删除汇款中的充值记录
+     */
+    public function delRecharge()
+    {
+
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="recharge_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->delAdvice($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="DRCH203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="DRCH203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
+
+    /**
+     * 删除订单
+     *
+     */
+    public function delOrder()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData=array();
+        if($agentinfo!=""){
+            $keys="order_id";
+            $errorKey=existsArrayKey($keys,$info);
+            if($errorKey=="")
+            {
+
+
+
+                $requestData=$this->wproductstore->delOrder($info);
+
+
+
+            }
+            else
+            {
+                $requestData['Data']='';
+                $requestData["ErrorCode"]="parameter-error";
+                $requestData["ErrorMessage"]="参数接收错误";
+                $requestData["Success"]=false;
+                $requestData["Status_Code"]="DRCH203";
+
+            }
+
+        }
+        else
+        {
+            $requestData['Data']='';
+            $requestData["ErrorCode"]="parameter-error";
+            $requestData["ErrorMessage"]="参数接收错误";
+            $requestData["Success"]=false;
+            $requestData["Status_Code"]="DRCH203";
+
+        }
+
+        header("HTTP/1.1 200 Created");
+        header("Content-type: application/json");
+        echo json_encode($requestData);
+
+    }
+
     
     
     

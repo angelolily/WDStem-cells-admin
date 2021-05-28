@@ -15,6 +15,17 @@ function bykey_reitem($arr, $key){
 
 }
 
+//图片转换base64
+function fileToBase64($file){
+    $base64_file = '';
+    if(file_exists($file)){
+        $mime_type= mime_content_type($file);
+        $base64_data = base64_encode(file_get_contents($file));
+        $base64_file = 'data:'.$mime_type.';base64,'.$base64_data;
+    }
+    return $base64_file;
+}
+
 //单独文件类型，保存base64文件
 function base64_file_content_type($base64_image_content,$path,$name,$type="jpg"){
     $new_file = $path;

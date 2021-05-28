@@ -63,7 +63,7 @@ class CustomeInterface extends CI_Controller
         if($agentinfo!=""){
             $info = json_decode($agentinfo, true);
             $requestData=array();
-            $keys="custome_name,custome_sex,custome_birthday,custome_phone,custome_agent";
+            $keys="custome_openid,custome_name,custome_sex,custome_phone,custome_agent";
             $errorKey=existsArrayKey($keys,$info);
             if($errorKey=="")
             {

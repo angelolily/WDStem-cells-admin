@@ -17,6 +17,18 @@ class WechatLoginRegister extends HTY_service
         $this->load->helper('tool');
 	}
 
+
+    //get获取JSON
+    private function getJson($url){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return json_decode($output, true);
+    }
     public function wechatLogin($info)
     {
         $assdata=[];
@@ -26,12 +38,12 @@ class WechatLoginRegister extends HTY_service
             //判断是代理商还是客户登陆，不同小程序
             if($info['login_type']==1)
             {
-                $appid = "wx71b2317f2015c429";
-                $secret = "c94eb5b0801ee5d5046a6ff84069a2ac";
+                $appid = "wx355b1c3c2dda665f";
+                $secret = "c28c6f1a7f458f0470c05ae0c2c8b834";
             }
             else{
-                $appid = "wx71b2317f2015c429";
-                $secret = "c94eb5b0801ee5d5046a6ff84069a2ac";
+                $appid = "wx355b1c3c2dda665f";
+                $secret = "c28c6f1a7f458f0470c05ae0c2c8b834";
             }
 
 
@@ -55,7 +67,7 @@ class WechatLoginRegister extends HTY_service
             }
 
             //第二步:取得openid
-            $oauth2Url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=$appid&secret=$secret&code={$info['code']}&grant_type=authorization_code";
+            $oauth2Url = "https://api.weixin.qq.com/sns/jscode2session?appid=$appid&secret=$secret&js_code={$info['code']}&grant_type=authorization_code";
             $oauth2 = $this->getJson($oauth2Url);
 
             if(array_key_exists("errcode", $oauth2)){
@@ -71,41 +83,9 @@ class WechatLoginRegister extends HTY_service
             }
 
 
-            //第三步:根据全局access_token和openid查询用户信息
-            $access_token = $token["access_token"];
-            $openid = $oauth2['openid'];
-            $get_user_info_url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=$access_token&openid=$openid&lang=zh_CN";
-            $userinfo = $this->getJson($get_user_info_url);
-            if(array_key_exists("errcode", $userinfo)){
-                $assdata['Data']='';
-                $assdata["ErrorCode"]="user-error";
-                $assdata["ErrorMessage"]=$userinfo['errmsg'];
-                $assdata["Success"]=false;
-                $assdata["Status_Code"]="WL203";
-                log_message("error",$userinfo['errmsg']);
-                return $assdata;
 
+            $info['clien_openid'] = $oauth2['openid'];
 
-            }
-            if(count($userinfo)>0){
-
-                $info['clien_nickname']=array_key_exists('nickname',$userinfo)?$userinfo['nickname']:'';
-                $info['clien_sex']=array_key_exists('sex',$userinfo)?$userinfo['sex']:'';
-                $info['clien_openid']=$openid;
-                $info['clien_city']=array_key_exists('city',$userinfo)?$userinfo['city']:'';
-                $info['clien_photo']=array_key_exists('headimgurl',$userinfo)?$userinfo['headimgurl']:'';
-
-
-            }
-            else{
-                $assdata['Data']='';
-                $assdata["ErrorCode"]="user-error";
-                $assdata["ErrorMessage"]="获取用户信息失败";
-                $assdata["Success"]=false;
-                $assdata["Status_Code"]="WL204";
-                return $userinfo;
-
-            }
 
         }
 
@@ -113,11 +93,11 @@ class WechatLoginRegister extends HTY_service
         if($info['login_type']==1)
         {
 
-            $clien_info = $this->SysModel->table_seleRow("*", 'cell_customer', array('custome_openid' => $info['clien_openid']));
+            $clien_info = $this->Custome_Model->table_seleRow("*", 'cell_customer', array('custome_openid' => $info['clien_openid']));
         }
         else{
 
-            $clien_info = $this->SysModel->table_seleRow("*", 'base_user', array('openid' => $info['clien_openid']));
+            $clien_info = $this->Custome_Model->table_seleRow("*", 'base_user', array('openid' => $info['clien_openid']));
         }
 
         if(count($clien_info)>0)
@@ -151,12 +131,13 @@ class WechatLoginRegister extends HTY_service
     {
 
         $assdata=[];
+        $customeinfo=[];
 
         if(count($info)>0){
 
             if($info['custome_agent']=="")
             {
-                $info['custome_agent']="HTY5fe5995f6e7dd7.56485291";//没有服务商绑定的，默认1号公司服务商
+                $info['custome_agent']="13325289965";//没有服务商绑定的，默认1号公司服务商
             }
 
             //查询代理商部门id
@@ -165,6 +146,18 @@ class WechatLoginRegister extends HTY_service
             if(count($dept)>0)
             {
                 $info['custome_deptid']=$dept[0]['UserDept'];
+                //查询部门客服
+                $Mobile=$this->Custome_Model->table_seleRow('Mobile',"base_user",['UserDept'=>$info['custome_deptid'],'UserRole'=>'HTY60a237e70f7023.01140607']);
+                if(count($Mobile)>0)
+                {
+                    $info['custome_serivce']=$Mobile[0]['Mobile'];
+                }
+                else
+                {
+                    $info['custome_serivce']="13325289965";
+                }
+                $info['custome_serivce']=
+                $info['custome_created_time']=date('Y-m-d H:i');
                 $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
             }
             else{
@@ -174,7 +167,9 @@ class WechatLoginRegister extends HTY_service
 
 
             if($isok>=0){
-                $assdata['Data']=[];
+
+                $customeinfo=$this->Custome_Model->table_seleRow('*',"cell_customer",['custome_openid'=>$info['custome_openid']]);
+                $assdata['Data']=$customeinfo[0];
                 $assdata["ErrorCode"]="";
                 $assdata["ErrorMessage"]="插入成功";
                 $assdata["Success"]=true;
@@ -233,7 +228,7 @@ class WechatLoginRegister extends HTY_service
 
 
                 if($isok>=0){
-                    $assdata['Data']=[];
+                    $assdata['Data']=$info;
                     $assdata["ErrorCode"]="";
                     $assdata["ErrorMessage"]="插入成功";
                     $assdata["Success"]=true;

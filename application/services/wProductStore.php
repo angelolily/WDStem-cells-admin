@@ -87,7 +87,7 @@ class wProductStore extends HTY_service
             }
             else
             {
-                $oid=['order_autoid <='=>$info['order_autoid']];
+                $oid=['order_autoid <'=>$info['order_autoid']];
             }
 
             if($info['order_customer_name']=="")
@@ -99,7 +99,7 @@ class wProductStore extends HTY_service
 
                     $ag_custome = array_column($ag_custome, 'custome_id');
                     $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
-                                    $oid,[],10,0,"order_datetime","DESC",$ag_custome,"order_customer");
+                                    $oid,[],10,0,"order_datetime,order_id","DESC",$ag_custome,"order_customer");
 
                     if(count($order_list)>0)
                     {
@@ -148,13 +148,13 @@ class wProductStore extends HTY_service
                     }
                     else
                     {
-                        $oid=['order_autoid <='=>$info['order_autoid'],'custome_id'=>$ag_custome[0]['custome_id']];
+                        $oid=['order_autoid <'=>$info['order_autoid'],'order_customer'=>$ag_custome[0]['custome_id']];
                     }
 
 
 
                     $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
-                        $oid,[],10,0,"order_datetime","DESC");
+                        $oid,[],10,0,"order_datetime,order_id","DESC");
 
                     if(count($order_list)>0)
                     {
@@ -212,12 +212,12 @@ class wProductStore extends HTY_service
             }
             else
             {
-                $oid=['order_autoid <='=>$info['order_autoid'],'order_customer'=>$info['order_customer']];
+                $oid=['order_autoid <'=>$info['order_autoid'],'order_customer'=>$info['order_customer']];
             }
 
 
             $order_list=$this->Custome_Model->table_seleRow_limit("*","cell_order",
-                $oid,[],10,0,"order_datetime","DESC");
+                $oid,[],10,0,"order_datetime,order_id","DESC");
 
             if(count($order_list)>0)
             {
@@ -350,7 +350,7 @@ class wProductStore extends HTY_service
             }
             else
             {
-                $oid=['advice_id <='=>$info['advice_id'],'advice_custome'=>$info['advice_custome']];
+                $oid=['advice_id <'=>$info['advice_id'],'advice_custome'=>$info['advice_custome']];
             }
 
 
@@ -613,6 +613,214 @@ class wProductStore extends HTY_service
 
 
 
+    /**
+     * 上传成功体检报告修改数据表信息
+     * @param array $info
+     * @return array
+     */
+    public function modifyHealth($orderid)
+    {
+        $appdata=[];
+        if($orderid!="")
+        {
+            $mod['order_health']=$orderid;
+            $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",$mod,['order_id'=>$orderid]);
+            if($isAddtrue>0)
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="修改成功";
+                $appdata["Success"]=true;
+                $appdata["Status_Code"]="MDH200";
+            }
+            else
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="修改失败";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="MDH201";
+
+            }
+
+        }
+        else
+        {
+            $appdata['Data']=[];
+            $appdata["ErrorCode"]="";
+            $appdata["ErrorMessage"]="参数接收失败";
+            $appdata["Success"]=false;
+            $appdata["Status_Code"]="MDH202";
+        }
+
+
+        return $appdata;
+
+    }
+
+
+    public function delAdvice($info)
+    {
+        $appdata=[];
+        if(count($info)>0)
+        {
+
+            $ag_custome=$this->Custome_Model->table_seleRow('recharge_status',"call_racharge",['recharge_id'=>$info['recharge_id']]);
+            if(count($ag_custome)>0)
+            {
+                if($ag_custome[0]['recharge_status']=="汇款中")
+                {
+                    $isAddtrue=$this->Custome_Model->table_del("call_racharge",['recharge_id'=>$info['recharge_id']]);
+                    if($isAddtrue>0)
+                    {
+                        $appdata['Data']=[];
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="删除成功";
+                        $appdata["Success"]=true;
+                        $appdata["Status_Code"]="DRCH200";
+                    }
+                    else
+                    {
+                        $appdata['Data']=[];
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="删除失败";
+                        $appdata["Success"]=false;
+                        $appdata["Status_Code"]="DRCH201";
+
+                    }
+                }
+                else
+                {
+                    $appdata['Data']=[];
+                    $appdata["ErrorCode"]="";
+                    $appdata["ErrorMessage"]="订单状态不是汇款中";
+                    $appdata["Success"]=false;
+                    $appdata["Status_Code"]="DRCH202";
+
+                }
+            }
+
+
+
+        }
+        else
+        {
+            $appdata['Data']=[];
+            $appdata["ErrorCode"]="";
+            $appdata["ErrorMessage"]="参数接收失败";
+            $appdata["Success"]=false;
+            $appdata["Status_Code"]="DRCH203";
+        }
+
+
+        return $appdata;
+
+    }
+
+    public function delOrder($info)
+    {
+        $appdata=[];
+        if(count($info)>0)
+        {
+
+            $ag_custome=$this->Custome_Model->table_seleRow('order_statue',"cell_order",['order_id'=>$info['order_id']]);
+            if(count($ag_custome)>0)
+            {
+                if(!($ag_custome[0]['order_statue']!="进行中" || $ag_custome[0]['order_statue']!="已完成" || $ag_custome[0]['order_statue']!="待实名"))
+                {
+                    $isAddtrue=$this->Custome_Model->table_del("cell_order",['order_id'=>$info['order_id']]);
+                    if($isAddtrue>0)
+                    {
+                        $appdata['Data']=[];
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="删除成功";
+                        $appdata["Success"]=true;
+                        $appdata["Status_Code"]="DRCH200";
+                    }
+                    else
+                    {
+                        $appdata['Data']=[];
+                        $appdata["ErrorCode"]="";
+                        $appdata["ErrorMessage"]="删除失败";
+                        $appdata["Success"]=false;
+                        $appdata["Status_Code"]="DRCH201";
+
+                    }
+                }
+                else
+                {
+                    $appdata['Data']=[];
+                    $appdata["ErrorCode"]="";
+                    $appdata["ErrorMessage"]="订单状态不对";
+                    $appdata["Success"]=false;
+                    $appdata["Status_Code"]="DRCH202";
+
+                }
+            }
+            else
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="订单不存在";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="DRCH202";
+
+            }
+
+
+
+        }
+        else
+        {
+            $appdata['Data']=[];
+            $appdata["ErrorCode"]="";
+            $appdata["ErrorMessage"]="参数接收失败";
+            $appdata["Success"]=false;
+            $appdata["Status_Code"]="DRCH203";
+        }
+
+
+        return $appdata;
+
+    }
+
+    /**
+     * 身份证背面上传
+     * @param array $info
+     * @return array
+     */
+    public function updateBackup($order_id,$cardback)
+    {
+        $appdata=[];
+        if($order_id && $cardback)
+        {
+
+            $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",['order_CardSaveBack'=>$cardback],['order_id'=>$order_id]);
+            if($isAddtrue>0)
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="修改成功";
+                $appdata["Success"]=true;
+                $appdata["Status_Code"]="ARECH200";
+            }
+            else
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="修改失败";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="ARECH201";
+
+            }
+
+
+        }
+
+
+        return $appdata;
+
+    }
 
 
     
