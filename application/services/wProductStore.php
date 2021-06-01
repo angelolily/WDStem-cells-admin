@@ -37,10 +37,10 @@ class wProductStore extends HTY_service
 
             for($i=0;$i<count($product_list);$i++)
             {
-                $product_list[$i]['product_cover']=site_url("/public/prodcutimage/".$product_list[$i]['product_cover']);
+                $product_list[$i]['product_cover']="http://wdcells.fjspacecloud.com/public/prodcutimage/".$product_list[$i]['product_cover'];
                 $pptfiles=explode(",",$product_list[$i]['product_ppt']);
                 $pptfiles = array_map(function ($item){
-                    return site_url("/public/prodcutimage/").$item;
+                    return "http://wdcells..fjspacecloud.com/public/prodcutimage/".$item;
                 },$pptfiles);
                 $product_list[$i]['product_ppt']=$pptfiles;
             }
@@ -726,7 +726,7 @@ class wProductStore extends HTY_service
             $ag_custome=$this->Custome_Model->table_seleRow('order_statue',"cell_order",['order_id'=>$info['order_id']]);
             if(count($ag_custome)>0)
             {
-                if(!($ag_custome[0]['order_statue']!="进行中" || $ag_custome[0]['order_statue']!="已完成" || $ag_custome[0]['order_statue']!="待实名"))
+                if($ag_custome[0]['order_statue']!="进行中" || $ag_custome[0]['order_statue']!="已完成" || $ag_custome[0]['order_statue']!="待实名")
                 {
                     $isAddtrue=$this->Custome_Model->table_del("cell_order",['order_id'=>$info['order_id']]);
                     if($isAddtrue>0)

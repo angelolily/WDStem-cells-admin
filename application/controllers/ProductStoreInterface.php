@@ -629,7 +629,7 @@ class ProductStoreInterface extends CI_Controller
             {
 
                 //修改身份证照片
-                $requestData=$this->checkidcardinformation->updateBackup($ordernum,$savePath);
+                $requestData=$this->wproductstore->updateBackup($ordernum,$savePath);
 
             }
             else
@@ -923,9 +923,7 @@ class ProductStoreInterface extends CI_Controller
 
         }
 
-        header("HTTP/1.1 200 Created");
-        header("Content-type: application/json");
-        echo json_encode($requestData);
+        http_data("200",$requestData,$this);
 
     }
 
