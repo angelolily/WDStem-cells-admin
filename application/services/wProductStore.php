@@ -38,6 +38,7 @@ class wProductStore extends HTY_service
             for($i=0;$i<count($product_list);$i++)
             {
                 $product_list[$i]['product_cover']="http://wdcells.fjspacecloud.com/public/prodcutimage/".$product_list[$i]['product_cover'];
+                $product_list[$i]['product_details']="http://wdcells.fjspacecloud.com/public/prodcutimage/".$product_list[$i]['product_details'];
                 $pptfiles=explode(",",$product_list[$i]['product_ppt']);
                 $pptfiles = array_map(function ($item){
                     return "http://wdcells..fjspacecloud.com/public/prodcutimage/".$item;
@@ -297,11 +298,11 @@ class wProductStore extends HTY_service
         {
             if($info['subscribe_id']==0)
             {
-                $oid=['subscribe_created_by'=>$info['subscribe_created_by']];
+                $oid=['subscribe_custome'=>$info['subscribe_custome']];
             }
             else
             {
-                $oid=['subscribe_id <='=>$info['subscribe_id'],'subscribe_created_by'=>$info['subscribe_created_by']];
+                $oid=['subscribe_id <='=>$info['subscribe_id'],'subscribe_custome'=>$info['subscribe_custome']];
             }
 
 
@@ -821,6 +822,11 @@ class wProductStore extends HTY_service
         return $appdata;
 
     }
+
+
+
+
+
 
 
     

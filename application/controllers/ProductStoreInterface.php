@@ -18,6 +18,7 @@ class ProductStoreInterface extends CI_Controller
         $this->load->service('CheckIdCardInformation');
         $this->load->service('Express');
         $this->load->helper('tool');
+        $this->load->helper('mail');
     }
 
 
@@ -27,7 +28,7 @@ class ProductStoreInterface extends CI_Controller
     public function ControlHomeProductList()
     {
 
-        $requestData=$this->wproductstore->getHomeProductList();
+        $requestData = $this->wproductstore->getHomeProductList();
         header("HTTP/1.1 200 Created");
         header("Content-type: application/json");
         echo json_encode($requestData);
@@ -44,24 +45,20 @@ class ProductStoreInterface extends CI_Controller
 
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
+        $requestData = array();
 
 
-        if (array_key_exists("customer_agent", $info)  && array_key_exists("order_customer_name", $info)  && array_key_exists("order_autoid", $info) && array_key_exists("order_type", $info))
-        {
+        if (array_key_exists("customer_agent", $info) && array_key_exists("order_customer_name", $info) && array_key_exists("order_autoid", $info) && array_key_exists("order_type", $info)) {
 
 
-            if($info['order_type']==1)
-            {
+            if ($info['order_type'] == 1) {
                 //代理商查看订单
-                $requestData=$this->wproductstore->getAgentOrderList($info);
+                $requestData = $this->wproductstore->getAgentOrderList($info);
 
 
-            }
-            else
-            {
+            } else {
                 //客户查看订单
-                $requestData=$this->wproductstore->getCustomeOrderList($info);
+                $requestData = $this->wproductstore->getCustomeOrderList($info);
             }
 
             header("HTTP/1.1 200 Created");
@@ -69,15 +66,12 @@ class ProductStoreInterface extends CI_Controller
             echo json_encode($requestData);
 
 
-
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="OSS203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "OSS203";
 
         }
 
@@ -91,38 +85,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="order_lowPrice,order_product,order_num,order_type,order_statue,order_price,order_customer,order_customer_name,order_user";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "order_lowPrice,order_product,order_num,order_type,order_statue,order_price,order_customer,order_customer_name,order_user";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->OneAddOrder($info);
-
+                $requestData = $this->wproductstore->OneAddOrder($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="OAD203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "OAD203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="OAD203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "OAD203";
 
         }
 
@@ -131,14 +118,14 @@ class ProductStoreInterface extends CI_Controller
         echo json_encode($requestData);
 
 
-
     }
 
 
     /**
      *  短信接口
      */
-    public function ControlSendSMS(){
+    public function ControlSendSMS()
+    {
 
         // 短信应用SDK AppID
         $appid = 1400159743; // 1400开头
@@ -146,50 +133,46 @@ class ProductStoreInterface extends CI_Controller
         $appkey = "49b360a1ba1a7dd2bac744bd0395658a";
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $keys="sendPhone,sendName";
-        $requestData=array();
-        if($agentinfo!=""){
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $keys = "sendPhone,sendName";
+        $requestData = array();
+        if ($agentinfo != "") {
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
-                $sendinfo[0]=$info['sendName'];
-                $sendinfo[1]=rand(1111,9999);
+                $sendinfo[0] = $info['sendName'];
+                $sendinfo[1] = rand(1111, 9999);
                 $ssender = new SmsSingleSender($appid, $appkey);
-                $requestSMS= $ssender->sendWithParam("86",$info['sendPhone'],"952423",$sendinfo,"沃顿健康管理");
+                $requestSMS = $ssender->sendWithParam("86", $info['sendPhone'], "952423", $sendinfo, "沃顿健康管理");
                 $rsp = json_decode($requestSMS, true);
                 if ($rsp["result"] === 0) {
-                    $sendinfo[0]=$info['sendPhone'];
-                    $requestData['Data']=$sendinfo;
-                    $requestData["ErrorCode"]="";
-                    $requestData["ErrorMessage"]="";
-                    $requestData["Success"]=true;
-                    $requestData["Status_Code"]="SMS200";
+                    $sendinfo[0] = $info['sendPhone'];
+                    $requestData['Data'] = $sendinfo;
+                    $requestData["ErrorCode"] = "";
+                    $requestData["ErrorMessage"] = "";
+                    $requestData["Success"] = true;
+                    $requestData["Status_Code"] = "SMS200";
 
                 } else {
-                    $requestData['Data']="";
-                    $requestData["ErrorCode"]="";
-                    $requestData["ErrorMessage"]=$rsp['errmsg'];
-                    $requestData["Success"]=true;
-                    $requestData["Status_Code"]="SMS201";
+                    $requestData['Data'] = "";
+                    $requestData["ErrorCode"] = "";
+                    $requestData["ErrorMessage"] = $rsp['errmsg'];
+                    $requestData["Success"] = true;
+                    $requestData["Status_Code"] = "SMS201";
 
                 }
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "SMS203";
             }
-            else{
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="SMS203";
-            }
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="SMS203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "SMS203";
 
         }
         header("HTTP/1.1 200 Created");
@@ -207,38 +190,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="subscribe_created_by,subscribe_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "subscribe_custome,subscribe_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->getSubscribe($info);
-
+                $requestData = $this->wproductstore->getSubscribe($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="SUB203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "SUB203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="SUB203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "SUB203";
 
         }
 
@@ -257,38 +233,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="advice_custome,advice_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "advice_custome,advice_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->getAdvice($info);
-
+                $requestData = $this->wproductstore->getAdvice($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ADV203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ADV203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -307,38 +276,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="advice_type,advice_custome,advice_center,advice_phone,custome_deptid";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "advice_type,advice_custome,advice_center,advice_phone,custome_deptid";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->AddAdvice($info);
-
+                $requestData = $this->wproductstore->AddAdvice($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ADV203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ADV203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -356,38 +318,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="custome_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "custome_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->getAccount($info);
-
+                $requestData = $this->wproductstore->getAccount($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ACNT203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ACNT203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ACNT203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ACNT203";
 
         }
 
@@ -404,38 +359,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="recharge_custome,recharge_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "recharge_custome,recharge_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->getRechargeList($info);
-
+                $requestData = $this->wproductstore->getRechargeList($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ACNT203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ACNT203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ACNT203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ACNT203";
 
         }
 
@@ -452,38 +400,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="recharge_money,recharge_custome,recharge_rate";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "recharge_money,recharge_custome,recharge_rate";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->addRecharge($info);
-
+                $requestData = $this->wproductstore->addRecharge($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ADV203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ADV203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -499,38 +440,31 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="recharge_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "recharge_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->modifyRecharge($info);
-
+                $requestData = $this->wproductstore->modifyRecharge($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ADV203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ADV203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -544,50 +478,43 @@ class ProductStoreInterface extends CI_Controller
      */
     public function isCardTrue()
     {
-        $files=$_FILES;
-        $resulArr=[];
-        $saveFileName="";
-        $ordernum=$this->input->post('order_id');//订单id
-        $applyname=$this->input->post('applyname');//验证姓名
-        $custome_ide=$this->input->post('custome_id');//判断是否要同步更新客户表
+        $files = $_FILES;
+        $resulArr = [];
+        $saveFileName = "";
+        $ordernum = $this->input->post('order_id');//订单id
+        $applyname = $this->input->post('applyname');//验证姓名
+        $custome_ide = $this->input->post('custome_id');//判断是否要同步更新客户表
 
-        $requestData=array();
-        if(count($files)>0)
-        {
-            $dirpath="./public/idCard/".$ordernum;
+        $requestData = array();
+        if (count($files) > 0) {
+            $dirpath = "./public/idCard/" . $ordernum;
             //判断目录是否存在，如果不存在就新建
-            if(is_dir($dirpath) or mkdir($dirpath))
-            {
+            if (is_dir($dirpath) or mkdir($dirpath)) {
 
             }
 
 
             $file_tmp = $files['cardfile']['tmp_name'];
-            $savePath=$dirpath."/".$files['cardfile']['name'];
+            $savePath = $dirpath . "/" . $files['cardfile']['name'];
             $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
 
-            if($move_result)
-            {
+            if ($move_result) {
                 //识别身份证
-                $requestData=$this->checkidcardinformation->isIdCard($savePath,$applyname,$ordernum,$custome_ide);
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="CCA205";
+                $requestData = $this->checkidcardinformation->isIdCard($savePath, $applyname, $ordernum, $custome_ide);
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "CCA205";
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -604,51 +531,44 @@ class ProductStoreInterface extends CI_Controller
      */
     public function saveCardBack()
     {
-        $files=$_FILES;
-        $resulArr=[];
-        $saveFileName="";
-        $ordernum=$this->input->post('order_id');//订单id
+        $files = $_FILES;
+        $resulArr = [];
+        $saveFileName = "";
+        $ordernum = $this->input->post('order_id');//订单id
 
-        $requestData=array();
-        if(count($files)>0)
-        {
-            $dirpath="./public/idCard/".$ordernum;
+        $requestData = array();
+        if (count($files) > 0) {
+            $dirpath = "./public/idCard/" . $ordernum;
             //判断目录是否存在，如果不存在就新建
-            if(is_dir($dirpath) or mkdir($dirpath))
-            {
+            if (is_dir($dirpath) or mkdir($dirpath)) {
 
 
             }
 
 
             $file_tmp = $files['cardfileback']['tmp_name'];
-            $savePath=$dirpath."/".$files['cardfileback']['name'];
+            $savePath = $dirpath . "/" . $files['cardfileback']['name'];
             $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
 
-            if($move_result)
-            {
+            if ($move_result) {
 
                 //修改身份证照片
-                $requestData=$this->wproductstore->updateBackup($ordernum,$savePath);
+                $requestData = $this->wproductstore->updateBackup($ordernum, $savePath);
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="CCA205";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "CCA205";
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -665,52 +585,45 @@ class ProductStoreInterface extends CI_Controller
      */
     public function isFaceTrue()
     {
-        $files=$_FILES;
-        $resulArr=[];
-        $saveFileName="";
-        $ordernum=$this->input->post('order_id');//订单id
-        $applyname=$this->input->post('name');//验证姓名
-        $acard=$this->input->post('card');//验证身份证号码
-        $custome_id=$this->input->post('custome_id');//判断是否要同步更新客户表
+        $files = $_FILES;
+        $resulArr = [];
+        $saveFileName = "";
+        $ordernum = $this->input->post('order_id');//订单id
+        $applyname = $this->input->post('name');//验证姓名
+        $acard = $this->input->post('card');//验证身份证号码
+        $custome_id = $this->input->post('custome_id');//判断是否要同步更新客户表
 
-        $requestData=array();
-        if(count($files)>0)
-        {
-            $dirpath="./public/idCard/".$ordernum;
+        $requestData = array();
+        if (count($files) > 0) {
+            $dirpath = "./public/idCard/" . $ordernum;
             //判断目录是否存在，如果不存在就新建
-            if(is_dir($dirpath) or mkdir($dirpath))
-            {
+            if (is_dir($dirpath) or mkdir($dirpath)) {
 
             }
 
             //默认上传识别第一张图片
             $file_tmp = $files['face']['tmp_name'];
-            $savePath=$dirpath."/".$files['face']['name'];
+            $savePath = $dirpath . "/" . $files['face']['name'];
             $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
 
-            if($move_result)
-            {
+            if ($move_result) {
 
 
-                $requestData=$this->checkidcardinformation->isFacetrue($savePath,$applyname,$acard,$custome_id,$ordernum);
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="CCA205";
+                $requestData = $this->checkidcardinformation->isFacetrue($savePath, $applyname, $acard, $custome_id, $ordernum);
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "CCA205";
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -728,44 +641,36 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="order_logistics";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "order_logistics";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->express->getExpressinfo($info['order_logistics']);
-
+                $requestData = $this->express->getExpressinfo($info['order_logistics']);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="ACNT203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "ACNT203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ACNT203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ACNT203";
 
         }
 
-        header("HTTP/1.1 200 Created");
-        header("Content-type: application/json");
-        echo json_encode($requestData);
+        http_data("200", $requestData, $this);
+
 
     }
 
@@ -774,11 +679,11 @@ class ProductStoreInterface extends CI_Controller
      */
     public function uploadfileMedical()
     {
-        $files=$_FILES;
-        $i=0;
-        $ordernum=$this->input->post('order_id');//订单id
+        $files = $_FILES;
+        $i = 0;
+        $ordernum = $this->input->post('order_id');//订单id
 
-        if(count($files)>0) {
+        if (count($files) > 0) {
             $dirpath = "./public/medical/" . $ordernum;
             //判断目录是否存在，如果不存在就新建
             if (is_dir($dirpath) or mkdir($dirpath)) {
@@ -787,39 +692,33 @@ class ProductStoreInterface extends CI_Controller
             //默认上传识别第一张图片
 
 
-            foreach ($files as $file)
-            {
+            foreach ($files as $file) {
                 //图片按顺序保存
 
                 $file_tmp = $file['tmp_name'];
-                $savePath=$dirpath."/".rand(111,222).".jpg";
+                $savePath = $dirpath . "/" . rand(111, 222) . ".jpg";
                 $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
 
             }
 
 
-            if($i==count($files))
-            {
+            if ($i == count($files)) {
 
 
-                $requestData=$this->wproductstore->modifyHealth($ordernum);
+                $requestData = $this->wproductstore->modifyHealth($ordernum);
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "CCA205";
             }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="CCA205";
-            }
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="ADV203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "ADV203";
 
         }
 
@@ -827,7 +726,7 @@ class ProductStoreInterface extends CI_Controller
         header("Content-type: application/json");
         echo json_encode($requestData);
 
-        
+
     }
 
     /**
@@ -838,38 +737,31 @@ class ProductStoreInterface extends CI_Controller
 
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="recharge_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "recharge_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->delAdvice($info);
-
+                $requestData = $this->wproductstore->delAdvice($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="DRCH203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "DRCH203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="DRCH203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "DRCH203";
 
         }
 
@@ -888,42 +780,76 @@ class ProductStoreInterface extends CI_Controller
     {
         $agentinfo = file_get_contents('php://input');
         $info = json_decode($agentinfo, true);
-        $requestData=array();
-        if($agentinfo!=""){
-            $keys="order_id";
-            $errorKey=existsArrayKey($keys,$info);
-            if($errorKey=="")
-            {
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "order_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
 
 
-
-                $requestData=$this->wproductstore->delOrder($info);
-
+                $requestData = $this->wproductstore->delOrder($info);
 
 
-            }
-            else
-            {
-                $requestData['Data']='';
-                $requestData["ErrorCode"]="parameter-error";
-                $requestData["ErrorMessage"]="参数接收错误";
-                $requestData["Success"]=false;
-                $requestData["Status_Code"]="DRCH203";
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "DRCH203";
 
             }
 
-        }
-        else
-        {
-            $requestData['Data']='';
-            $requestData["ErrorCode"]="parameter-error";
-            $requestData["ErrorMessage"]="参数接收错误";
-            $requestData["Success"]=false;
-            $requestData["Status_Code"]="DRCH203";
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "DRCH203";
 
         }
 
-        http_data("200",$requestData,$this);
+        http_data("200", $requestData, $this);
+
+    }
+
+
+
+
+    public function sendMail()
+    {
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData = array();
+        if ($agentinfo != "") {
+
+            $keys = "outmail,theme，attachment";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
+
+
+                $requestData = sendMail($info['outmail'], $info['theme'], $info['attachment']);
+
+
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "DRCH203";
+
+            }
+
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "DRCH203";
+
+        }
+
+        http_data("200", $requestData, $this);
+
 
     }
 
