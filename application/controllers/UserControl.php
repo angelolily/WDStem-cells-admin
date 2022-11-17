@@ -91,6 +91,7 @@ class UserControl extends CI_Controller
 	{
 		$keys="Mobile,UserName,UserStatus,DeptId,pages,rows,begin,end,DataScope,powerdept";
 		$this->hedVerify($keys);
+        $this->hedVerify();
 		$result = $this->usermanage->getUser($this->dataArr,$this->userArr['Mobile']);
 		if (count($result) >= 0) {
 			$resulArr = build_resulArr('D000', true, '获取成功', json_encode($result));

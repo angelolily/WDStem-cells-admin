@@ -27,11 +27,18 @@ class CustomeInterface extends CI_Controller
         $requestData=array();
 
 
-        if (array_key_exists("code", $info)  && array_key_exists("clien_openid", $info) && array_key_exists("login_type", $info))
+        if (array_key_exists("code", $info)  && array_key_exists("clien_openid", $info)  && array_key_exists("UserPassword", $info) && array_key_exists("login_type", $info))
         {
 
+            if($info['login_type']==1)
+            {
+                $requestData=$this->wechatloginregister->appLogin($info);
+            }
+            else{
+                $requestData=$this->wechatloginregister->wechatLogin($info);
+            }
 
-            $requestData=$this->wechatloginregister->wechatLogin($info);
+
 
 
         }
@@ -40,7 +47,7 @@ class CustomeInterface extends CI_Controller
             $requestData["ErrorCode"]="parameter-error";
             $requestData["ErrorMessage"]="参数接收错误";
             $requestData["Success"]=false;
-            $requestData["Status_Code"]="WL206";
+            $requestData["Status_Code"]="AL203";
         }
         header("HTTP/1.1 200 Created");
         header("Content-type: application/json");
@@ -63,7 +70,7 @@ class CustomeInterface extends CI_Controller
         if($agentinfo!=""){
             $info = json_decode($agentinfo, true);
             $requestData=array();
-            $keys="custome_openid,custome_name,custome_sex,custome_phone,custome_agent";
+            $keys="custome_openid,custome_name,custome_sex,custome_phone,custome_agent,UserPassword";
             $errorKey=existsArrayKey($keys,$info);
             if($errorKey=="")
             {
@@ -105,6 +112,7 @@ class CustomeInterface extends CI_Controller
 
 
     }
+
 
 
 

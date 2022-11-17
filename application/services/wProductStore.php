@@ -27,7 +27,7 @@ class wProductStore extends HTY_service
 
         $product_list=[];
         $appdata=[];
-        $product_list = $this->Custome_Model->table_seleRow_limit("product_id,product_name,product_type,product_price,
+        $product_list = $this->Custome_Model->table_seleRow_limit("product_describe,product_id,product_name,product_type,product_price,
                                                       product_lowPrice,product_format,
                                                       product_weights,product_details,product_cover,product_ppt,product_details", 'cell_product',[],[],10,0,'product_weights','DESC');
 
@@ -37,11 +37,12 @@ class wProductStore extends HTY_service
 
             for($i=0;$i<count($product_list);$i++)
             {
-                $product_list[$i]['product_cover']="http://wdcells.fjspacecloud.com/public/prodcutimage/".$product_list[$i]['product_cover'];
-                $product_list[$i]['product_details']="http://wdcells.fjspacecloud.com/public/prodcutimage/".$product_list[$i]['product_details'];
+                $product_list[$i]['product_cover']="http://wdcells.fjspacecloud.com/WDStem-cells-admin/public/productimg/".$product_list[$i]['product_cover'];
+                $product_list[$i]['product_details']="http://wdcells.fjspacecloud.com/WDStem-cells-admin/public/productimg/".$product_list[$i]['product_details'];
+                $product_list[$i]['product_ppt']=trim($product_list[$i]['product_ppt'],",");
                 $pptfiles=explode(",",$product_list[$i]['product_ppt']);
                 $pptfiles = array_map(function ($item){
-                    return "http://wdcells..fjspacecloud.com/public/prodcutimage/".$item;
+                    return "http://wdcells.fjspacecloud.com/WDStem-cells-admin/public/productimg/".$item;
                 },$pptfiles);
                 $product_list[$i]['product_ppt']=$pptfiles;
             }
@@ -625,8 +626,9 @@ class wProductStore extends HTY_service
         if($orderid!="")
         {
             $mod['order_health']=$orderid;
+            $mod['order_statue']="待审核";
             $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",$mod,['order_id'=>$orderid]);
-            if($isAddtrue>0)
+            if($isAddtrue>=0)
             {
                 $appdata['Data']=[];
                 $appdata["ErrorCode"]="";
@@ -797,7 +799,7 @@ class wProductStore extends HTY_service
         {
 
             $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",['order_CardSaveBack'=>$cardback],['order_id'=>$order_id]);
-            if($isAddtrue>0)
+            if($isAddtrue>=0)
             {
                 $appdata['Data']=[];
                 $appdata["ErrorCode"]="";
@@ -826,14 +828,121 @@ class wProductStore extends HTY_service
 
 
 
+    /**
+     * 新增客户寄出牙髓盒快递记录
+     * @param array $info
+     * @return array
+     */
+    public function addCustomelogistics($info=[])
+    {
+        $appdata=[];
+        if(count($info)>0)
+        {
 
+            $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",['order_Customelogistics'=>$info['order_Customelogistics']],['order_id'=>$info['order_id']]);
+            if($isAddtrue>0)
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="添加成功";
+                $appdata["Success"]=true;
+                $appdata["Status_Code"]="CLSC203200";
+            }
+            else
+            {
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="添加失败";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="CLSC203201";
+
+            }
+
+        }
+
+
+        return $appdata;
+
+    }
 
 
     
     
 
     
+    //导出excel
+    public function outExcel($table,$where=[],$like=[])
+    {
+        $title=[];
+        $appdata=[];
+        $slike=[];
+        $swhere=[];
+        $sql_struct="select column_comment from INFORMATION_SCHEMA.Columns where table_name='".$table."' and table_schema='hanfu-world-db'";
 
+
+        $array_struct=$this->Custome_Model->execute_sql($sql_struct);
+
+        if(count($array_struct)>0)
+        {
+            foreach ($array_struct as $key=>$value){
+
+
+                array_push($title,$value['column_comment']);
+
+
+            }
+
+            $excel_data=$this->Custome_Model->table_seleRow("*",$table,$where,$like);
+            if(count($excel_data)>0)
+            {
+
+                $filename=date("Y-m-dhis");
+                $fistdir='./public/'.'outputExcel/';
+                $files=exportExcel($title,$excel_data,$filename,$fistdir,true,'a1');
+                //force_download($files, null);
+                if($files){
+
+                    $appdata['Data']=$this->config->item('serverExcelFilePata').$filename.'.xlsx';
+                    $appdata["ErrorCode"]="";
+                    $appdata["ErrorMessage"]="";
+                    $appdata["Success"]=true;
+                    $appdata["Status_Code"]="SING200";
+                }
+                else{
+                    $appdata['Data']=[];
+                    $appdata["ErrorCode"]="";
+                    $appdata["ErrorMessage"]="导出失败";
+                    $appdata["Success"]=false;
+                    $appdata["Status_Code"]="SING201";
+
+                }
+
+            }
+            else{
+                $appdata['Data']=[];
+                $appdata["ErrorCode"]="";
+                $appdata["ErrorMessage"]="无数据";
+                $appdata["Success"]=false;
+                $appdata["Status_Code"]="SING202";
+            }
+
+
+        }
+        else{
+            $appdata['Data']=[];
+            $appdata["ErrorCode"]="";
+            $appdata["ErrorMessage"]="无数据";
+            $appdata["Success"]=false;
+            $appdata["Status_Code"]="SING203";
+        }
+
+
+
+
+        return $appdata;
+
+
+    }
 
 
 

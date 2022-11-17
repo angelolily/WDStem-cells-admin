@@ -694,7 +694,7 @@ class ProductStoreInterface extends CI_Controller
 
             foreach ($files as $file) {
                 //图片按顺序保存
-
+                $i=$i+1;
                 $file_tmp = $file['tmp_name'];
                 $savePath = $dirpath . "/" . rand(111, 222) . ".jpg";
                 $move_result = move_uploaded_file($file_tmp, $savePath);//上传文件
@@ -813,8 +813,9 @@ class ProductStoreInterface extends CI_Controller
     }
 
 
-
-
+    /**
+     *  客户下载电子凭证，发送邮件
+     */
     public function sendMail()
     {
         $agentinfo = file_get_contents('php://input');
@@ -822,20 +823,37 @@ class ProductStoreInterface extends CI_Controller
         $requestData = array();
         if ($agentinfo != "") {
 
-            $keys = "outmail,theme，attachment";
+            $keys = "outmail,theme,attachment";
             $errorKey = existsArrayKey($keys, $info);
             if ($errorKey == "") {
 
 
-                $requestData = sendMail($info['outmail'], $info['theme'], $info['attachment']);
+                $dirpath="D:\\phpStudy\\PHPTutorial\\WWW\\WDStem-cells-admin\\public\\productimg\\".$info['attachment'];
 
+                $requestSate = sendMail($info['outmail'], $info['theme'], $dirpath);
+                if($requestSate)
+                {
+                    $requestData['Data'] = '';
+                    $requestData["ErrorCode"] = "";
+                    $requestData["ErrorMessage"] = "发送邮件成功";
+                    $requestData["Success"] = true;
+                    $requestData["Status_Code"] = "MAIL200";
+                }
+                else
+                {
+                    $requestData['Data'] = '';
+                    $requestData["ErrorCode"] = $requestSate;
+                    $requestData["ErrorMessage"] = "发送邮件失败";
+                    $requestData["Success"] = false;
+                    $requestData["Status_Code"] = "MAIL200";
+                }
 
             } else {
                 $requestData['Data'] = '';
                 $requestData["ErrorCode"] = "parameter-error";
                 $requestData["ErrorMessage"] = "参数接收错误";
                 $requestData["Success"] = false;
-                $requestData["Status_Code"] = "DRCH203";
+                $requestData["Status_Code"] = "MAIL201";
 
             }
 
@@ -844,7 +862,7 @@ class ProductStoreInterface extends CI_Controller
             $requestData["ErrorCode"] = "parameter-error";
             $requestData["ErrorMessage"] = "参数接收错误";
             $requestData["Success"] = false;
-            $requestData["Status_Code"] = "DRCH203";
+            $requestData["Status_Code"] = "MAIL202";
 
         }
 
@@ -853,9 +871,50 @@ class ProductStoreInterface extends CI_Controller
 
     }
 
-    
-    
-    
+    /**
+     *  客户寄件
+     */
+    public function ClienAddExpress()
+    {
+
+        $agentinfo = file_get_contents('php://input');
+        $info = json_decode($agentinfo, true);
+        $requestData = array();
+        if ($agentinfo != "") {
+            $keys = "order_Customelogistics,order_id";
+            $errorKey = existsArrayKey($keys, $info);
+            if ($errorKey == "") {
+
+
+                $requestData = $this->wproductstore->addCustomelogistics($info);
+
+
+            } else {
+                $requestData['Data'] = '';
+                $requestData["ErrorCode"] = "parameter-error";
+                $requestData["ErrorMessage"] = "参数接收错误";
+                $requestData["Success"] = false;
+                $requestData["Status_Code"] = "CLSC203";
+
+            }
+
+        } else {
+            $requestData['Data'] = '';
+            $requestData["ErrorCode"] = "parameter-error";
+            $requestData["ErrorMessage"] = "参数接收错误";
+            $requestData["Success"] = false;
+            $requestData["Status_Code"] = "CLSC203";
+
+        }
+
+        http_data("200", $requestData, $this);
+
+
+    }
+
+
+
+
 
 
 

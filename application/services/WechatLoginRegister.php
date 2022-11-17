@@ -15,6 +15,7 @@ class WechatLoginRegister extends HTY_service
 		parent::__construct();
 		$this->load->model('Custome_Model');
         $this->load->helper('tool');
+        $this->load->library('encryption');
 	}
 
 
@@ -29,6 +30,74 @@ class WechatLoginRegister extends HTY_service
         curl_close($ch);
         return json_decode($output, true);
     }
+
+
+    //APP登陆
+
+    public function appLogin($info){
+
+        $assdata=[];
+
+	    if(count($info)>0)
+        {
+
+            //判断是代理商还是客户登陆，不同App
+            if($info['login_type']==1)
+            {
+
+                $clien_info = $this->Custome_Model->table_seleRow("*", 'cell_customer', array('custome_openid' => $info['clien_openid']));
+            }
+            else{
+
+                $clien_info = $this->Custome_Model->table_seleRow("*", 'base_user', array('openid' => $info['clien_openid']));
+            }
+
+            if(count($clien_info)>0)
+            {
+                $pwd = $this->encryption->decrypt($clien_info[0]['UserPassword']);
+                if($pwd==$info['UserPassword'])
+                {
+                    $assdata["Data"]='';
+                    $assdata["ErrorCode"]="";
+                    $assdata["ErrorMessage"]="登陆成功";
+                    $assdata["Success"]=true;
+                    $assdata["Status_Code"]="AL200";
+
+                }
+                else{
+                    $assdata["Data"]='';
+                    $assdata["ErrorCode"]="";
+                    $assdata["ErrorMessage"]="登陆失败，密码不符合";
+                    $assdata["Success"]=false;
+                    $assdata["Status_Code"]="AL201";
+
+                }
+
+            }
+            else{
+
+                $assdata["Data"]='';
+                $assdata["ErrorCode"]="user-error";
+                $assdata["ErrorMessage"]="登陆失败，用户不存在";
+                $assdata["Success"]=false;
+                $assdata["Status_Code"]="AL202";
+
+
+
+            }
+
+
+
+            return $assdata;
+
+
+
+        }
+
+
+    }
+
+    //微信小程序登陆
     public function wechatLogin($info)
     {
         $assdata=[];
@@ -38,12 +107,12 @@ class WechatLoginRegister extends HTY_service
             //判断是代理商还是客户登陆，不同小程序
             if($info['login_type']==1)
             {
-                $appid = "wx355b1c3c2dda665f";
-                $secret = "c28c6f1a7f458f0470c05ae0c2c8b834";
+                $appid = "wx49967b15e5550331";
+                $secret = "6fd4fc295a92bb3ab3f9c69066d66b3c";
             }
             else{
-                $appid = "wx355b1c3c2dda665f";
-                $secret = "c28c6f1a7f458f0470c05ae0c2c8b834";
+                $appid = "wx49967b15e5550331";
+                $secret = "6fd4fc295a92bb3ab3f9c69066d66b3c";
             }
 
 
@@ -132,16 +201,33 @@ class WechatLoginRegister extends HTY_service
 
         $assdata=[];
         $customeinfo=[];
+        $isAddUpdate=0;
+        $cusid=1;
 
         if(count($info)>0){
 
             if($info['custome_agent']=="")
             {
-                $info['custome_agent']="13325289965";//没有服务商绑定的，默认1号公司服务商
+                //查询是否有报备过客户
+                $custome_id=$this->Custome_Model->table_seleRow('custome_id,custome_agent',"cell_customer",['custome_phone'=>$info['custome_phone']]);
+
+                if(count($custome_id)>0)
+                {
+                    $info['custome_agent']=$custome_id[0]['custome_agent'];
+                    $isAddUpdate=1;
+                    $cusid=$custome_id[0]['custome_id'];
+                }
+                else
+                {
+                    $info['custome_agent']="13325289965";//没有服务商绑定的，默认1号公司服务商
+                }
+
+
+
             }
 
             //查询代理商部门id
-            $dept=$this->Custome_Model->table_seleRow('UserDept',"base_user",['Userid'=>$info['custome_agent']]);
+            $dept=$this->Custome_Model->table_seleRow('UserDept',"base_user",['Mobile'=>$info['custome_agent']]);
 
             if(count($dept)>0)
             {
@@ -156,9 +242,17 @@ class WechatLoginRegister extends HTY_service
                 {
                     $info['custome_serivce']="13325289965";
                 }
-                $info['custome_serivce']=
                 $info['custome_created_time']=date('Y-m-d H:i');
-                $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
+                if($isAddUpdate==1)
+                {
+                    $isok=$this->Custome_Model->table_updateRow('cell_customer',$info,['custome_id'=>$cusid]);
+                }
+                else
+                {
+                    $info['UserPassword']=$pwd = $this->encryption->encrypt($info['UserPassword']);
+                    $isok=$this->Custome_Model->table_addRow('cell_customer',$info);
+                }
+
             }
             else{
                 $isok=-1;
@@ -205,6 +299,8 @@ class WechatLoginRegister extends HTY_service
 
     }
 
+
+
     //微信代理商注册
     public function wechatAgentRegist($info){
 
@@ -220,7 +316,7 @@ class WechatLoginRegister extends HTY_service
             if($isSave!="")
             {
                 //图片保存成功
-                $info['Avatar']="https://wdstem-cells-admin/public/agentAvatar/".$filename.".jpg";
+                $info['Avatar']="https://wdcells.fjspacecloud.com/wdstem-cells-admin/public/agentAvatar/".$filename.".jpg";
                 $info['UserStatus']=1;
                 $info['Userid']=uniqid("HTY", 4);
 

@@ -28,6 +28,22 @@ class CheckIdCardInformation extends HTY_service
         $appdata=[];
         if(file_exists($cardpath))
         {
+
+
+            //判断图片文件是否超过1M,进行压缩
+            $content = file_get_contents($cardpath);
+            $size = strlen($content);
+            $size=$size/1024;
+            $newFileName=rand(100000,999999);
+            $des="./public/idCard/".$order_id."/".$newFileName.".jpg";
+            if($size>900)
+            {
+                $this->imageSize($cardpath,$des);
+            }
+            else{
+                $des=$cardpath;
+            }
+
             try {
 
                 $cred = new Credential("AKIDd5HzUjjiaFfrrdJRfkaBWoshgePvlEVZ", "yiy1p321nLg3JL9i3A2EQEn6AGDvPs77");
@@ -41,7 +57,7 @@ class CheckIdCardInformation extends HTY_service
                 $req = new IdCardOCRVerificationRequest();
 
                 $params = array(
-                    "ImageBase64" => fileToBase64($cardpath)
+                    "ImageBase64" => fileToBase64($des)
                 );
                 $req->fromJsonString(json_encode($params));
 
@@ -58,7 +74,7 @@ class CheckIdCardInformation extends HTY_service
                     $reqImg = new CheckIdCardInformationRequest();
 
                     $params = array(
-                        "ImageBase64" => fileToBase64($cardpath)
+                        "ImageBase64" => fileToBase64($des)
                     );
                     $reqImg->fromJsonString(json_encode($params));
 
@@ -75,7 +91,7 @@ class CheckIdCardInformation extends HTY_service
                         $order_idInfo['order_Birth']=$regImgarra['Birth'];
                         $order_idInfo['order_CardSave']=$cardpath;
                         $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",$order_idInfo,['order_id'=>$order_id]);
-                        if($isAddtrue>0)
+                        if($isAddtrue>=0)
                         {
                             if($custome_id!="")
                             {
@@ -90,7 +106,7 @@ class CheckIdCardInformation extends HTY_service
                             }
 
 
-                            if($isAddtrue>0)
+                            if($isAddtrue>=0)
                             {
                                 $appdata['Data']=$order_idInfo;
                                 $appdata["ErrorCode"]="";
@@ -158,9 +174,36 @@ class CheckIdCardInformation extends HTY_service
     }
 
 
+    private function imageSize($source,$destination)
+    {
+
+        $image = imagecreatefromjpeg($source);  // 加载资源
+        if (isset($image) && is_resource($image)) {
+            imagejpeg($image, $destination, 40);   // 根据$quality比例进行
+            imagedestroy($image);
+        }
+
+    }
+
     public function isFacetrue($facepath,$name,$idcard,$custome_id,$order_id)
     {
         try {
+
+
+            //判断图片文件是否超过1M,进行压缩
+            $content = file_get_contents($facepath);
+            $size = strlen($content);
+            $size=$size/1024;
+            $newFileName=rand(10000,99999);
+            $des="./public/idCard/".$order_id."/".$newFileName.".jpg";
+            if($size>900)
+            {
+                $this->imageSize($facepath,$des);
+            }
+            else{
+                $des=$facepath;
+            }
+
 
             $cred = new Credential("AKIDd5HzUjjiaFfrrdJRfkaBWoshgePvlEVZ", "yiy1p321nLg3JL9i3A2EQEn6AGDvPs77");
             $httpProfile = new HttpProfile();
@@ -175,7 +218,7 @@ class CheckIdCardInformation extends HTY_service
             $params = array(
                 "IdCard" => $idcard,
                 "Name" => $name,
-                "ImageBase64" => fileToBase64($facepath)
+                "ImageBase64" => fileToBase64($des)
             );
             $req->fromJsonString(json_encode($params));
 
@@ -193,7 +236,7 @@ class CheckIdCardInformation extends HTY_service
                 }
                 //更新订单状态
                 $isAddtrue=$this->Custome_Model->table_updateRow("cell_order",['order_statue'=>'进行中'],['order_id'=>$order_id]);
-                if($isAddtrue>0)
+                if($isAddtrue>=0)
                 {
                     $appdata['Data']=[];
                     $appdata["ErrorCode"]="";
